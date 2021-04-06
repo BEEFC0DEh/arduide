@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.16.0)
+
 set(PLUGINS "serial" "debugger")
 
 file(GLOB plugins_SOURCES
@@ -21,15 +23,13 @@ foreach(PLUGIN ${PLUGINS})
   file(GLOB plugin_QRCS
     "${PLUGIN}/*.qrc")
 
-  # Empty the variables as qt4_wrap_* would append the result of the
-  # previous call with the new result.
-  set(plugin_UI_SOURCES "")
-  set(plugin_MOC_SOURCES "")
-  set(plugin_QRC_SOURCES "")
+  # Qt 6 boilerplate
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-  qt4_wrap_ui(plugin_UI_SOURCES ${plugin_UIS})
-  qt4_wrap_cpp(plugin_MOC_SOURCES ${plugin_MOCS})
-  qt4_add_resources(plugin_QRC_SOURCES ${plugin_QRCS})
+  set(CMAKE_AUTOMOC ON)
+  set(CMAKE_AUTORCC ON)
+  set(CMAKE_AUTOUIC ON)
 
   add_library(${PLUGIN} MODULE
     ${plugins_SOURCES}
