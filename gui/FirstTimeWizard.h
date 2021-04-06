@@ -33,7 +33,7 @@ This program is free software; you can redistribute it and/or modify
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-#include <ui_FirstTimeWizard.h>
+#include <arduino-ide_autogen/include/ui_FirstTimeWizard.h>
 
 class FirstTimeWizard : public QWizard, Ui::FirstTimeWizard
 {

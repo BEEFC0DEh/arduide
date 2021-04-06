@@ -30,7 +30,7 @@ This program is free software; you can redistribute it and/or modify
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "ui_MainWindow.h"
+#include "arduino-ide_autogen/include/ui_MainWindow.h"
 
 #include <QComboBox>
 #include <QToolButton>

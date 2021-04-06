@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef FORMAT_ADDRESS_20090910_H_
 #define FORMAT_ADDRESS_20090910_H_
+#include <QString>
 
 namespace util {
 	namespace detail {
@@ -38,7 +39,7 @@ namespace util {
 			}
 
 			static QString format(const char *fmt, T address) {
-				return QString().sprintf(fmt, (address >> 16) & 0xffff, address & 0xffff);
+                return QString::asprintf(fmt, (address >> 16) & 0xffff, address & 0xffff);
 			}
 		};
 
@@ -55,7 +56,7 @@ namespace util {
 			}
 
 			static QString format(const char *fmt, T address) {
-				return QString().sprintf(fmt, (address >> 32) & 0xffffffff, address & 0xffffffff);
+                return QString::asprintf(fmt, (address >> 32) & 0xffffffff, address & 0xffffffff);
 			}
 		};
 	}

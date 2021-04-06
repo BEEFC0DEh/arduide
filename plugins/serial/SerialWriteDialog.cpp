@@ -67,7 +67,7 @@ void SerialWriteDialog::writeInt()
 
     // get a list of integers from the line edit
     // qlonglong is assumed big enough to hold all values
-    QStringList values = intValueEdit->text().split(' ', QString::SkipEmptyParts);
+    QStringList values = intValueEdit->text().split(' ', Qt::SkipEmptyParts);
     if (values.size() == 0)
         return;
 
@@ -129,7 +129,7 @@ void SerialWriteDialog::writeBytes()
         setStatus(tr("Invalid hex value"));
         return;
     }
-    emit writeRequested(QByteArray::fromHex(hex.toAscii()));
+    emit writeRequested(QByteArray::fromHex(hex.toLatin1()));
 }
 
 void SerialWriteDialog::writeString()

@@ -3,9 +3,9 @@
 
   This file is part of arduide, The Qt-based IDE for the open-source Arduino electronics prototyping platform.
 
-  Copyright (C) 2010-2016 
+  Copyright (C) 2010-2016
   Authors : Denis Martinez
-	    Martin Peres
+        Martin Peres
 
 This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ This program is free software; you can redistribute it and/or modify
 #include <QStatusBar>
 #include <QDebug>
 
-#include <grantlee_core.h>
+#include <grantlee_templates.h>
 
 #include "IDEApplication.h"
 #include "PageRenderer.h"

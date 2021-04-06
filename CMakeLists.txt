@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.16.0)
 
 include(CheckIncludeFileCXX)
 
@@ -32,6 +32,14 @@ set(ARDUINO_SDK_VERSION "160")
 set(ARDUINO_SDK_VERSION_NAME "1.6.0")
 add_definitions(-DARDUINO_SDK_VERSION="${ARDUINO_SDK_VERSION}")
 add_definitions(-DARDUINO_SDK_VERSION_NAME="${ARDUINO_SDK_VERSION_NAME}")
+
+# Qt 5+ boilerplate
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
 # Compiler flags
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -100,9 +108,9 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   endif()
 
   # add grantlee's default directory on Linux systems
-  if(IS_DIRECTORY "/usr/lib/grantlee/0.5")
-    message("[GRANTLEE] 0.5 folder")
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/lib/grantlee/0.5")
+  if(IS_DIRECTORY "/usr/lib/grantlee/5.2")
+    message("[GRANTLEE5] 5.2 folder")
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/lib/grantlee/5.2")
   else()
     message("[GRANTLEE] default folder")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/lib/grantlee")
@@ -110,38 +118,37 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 # Qt
-set(Qt4_COMPONENTS QtCore QtGui QtNetwork QtWebkit)
+set(Qt5_COMPONENTS Core Gui Widgets Network Concurrent LinguistTools WebKitWidgets #[[Core5Compat WebEngine]])
 if(USE_DBUS)
-  set(Qt4_COMPONENTS ${Qt4_COMPONENTS} QtDbus)
+  set(Qt5_COMPONENTS ${Qt5_COMPONENTS} QtDbus)
 endif()
-include(FindQt4)
-find_package(Qt4 COMPONENTS ${Qt4_COMPONENTS} REQUIRED)
-include(${QT_USE_FILE})
+find_package(Qt5 COMPONENTS ${Qt5_COMPONENTS} REQUIRED)
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
-set(Qt4_LINK_LIBRARIES ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTNETWORK_LIBRARY} ${QT_QTWEBKIT_LIBRARY})
+set(Qt5_LINK_LIBRARIES Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network Qt5::Concurrent Qt5::WebKitWidgets #[[Qt5::Core5Compat]] ${QT_QTWEBKIT_LIBRARY})
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  set(Qt4_LINK_LIBRARIES ${Qt4_LINK_LIBRARIES} ${QT_QTDBUS_LIBRARY})
+  set(Qt5_LINK_LIBRARIES ${Qt5_LINK_LIBRARIES} ${QT_QTDBUS_LIBRARY})
 endif()
 
 # Grantlee
 if(Grantlee_HOME_DIR)
-  # this variable can be set manually as the path to GrantleeConfig.cmake
+  # this variable can be set manually as the path to Grantlee5Config.cmake
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Grantlee_HOME_DIR})
 endif()
-find_package(Grantlee REQUIRED)
-include(${Grantlee_USE_FILE})
+find_package(Grantlee5 REQUIRED)
 if(USE_FHS_PATHS)
   add_definitions(-DGRANTLEE_PLUGIN_DIR="${Grantlee_PLUGIN_PATH}")
 else()
   # grantlee plugins reside in the application directory
   add_definitions(-DGRANTLEE_PLUGIN_DIR=".")
 endif()
+set(Grantlee_CORE_LIBRARIES Grantlee5::Templates)
 
 # QScintilla
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  find_library(QScintilla_LIBRARY NAMES libqscintilla2.a qscintilla2.lib HINTS ${QT_LIBRARY_DIR})
+  find_library(QScintilla_LIBRARY NAMES libqscintilla2_qt5.a qscintilla2_qt5.lib HINTS ${QT_LIBRARY_DIR})
 else()
-  find_library(QScintilla_LIBRARY qscintilla2 HINTS ${QT_LIBRARY_DIR})
+  find_library(QScintilla_LIBRARY qscintilla2_qt5 HINTS ${QT_LIBRARY_DIR})
 endif()
 
 # Resources
@@ -157,9 +164,13 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 if(QScintilla_LIBRARY)
+  set(QT_INCLUDE_DIR /usr/include/qt)
   message(STATUS "QScintilla library: ${QScintilla_LIBRARY}")
+  message(STATUS "QT_INCLUDE_DIR: ${QT_INCLUDE_DIR}")
   get_filename_component(QScintilla_LIBRARY_PATH "${QScintilla_LIBRARY}" PATH)
+  set(CMAKE_FIND_DEBUG_MODE TRUE)
   find_path(QScintilla_INCLUDE_PATH Qsci/qsciscintilla.h HINTS ${QT_INCLUDE_DIR})
+  set(CMAKE_FIND_DEBUG_MODE FALSE)
   if(EXISTS "${QScintilla_INCLUDE_PATH}/Qsci/qsciscintilla.h")
     include_directories("${QScintilla_INCLUDE_PATH}")
     message(STATUS "QScintilla includes: ${QScintilla_INCLUDE_PATH}")
@@ -201,8 +212,6 @@ file(GLOB utils_MOCS
   "utils/qxt/*.h"
   "utils/hexview/*.h")
 
-qt4_wrap_cpp(utils_MOC_SOURCES ${utils_MOCS})
-
 # Build
 file(GLOB arduino_SOURCES
   "*.cpp" "*.h"
@@ -235,41 +244,38 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set(arduino_QRCS ${arduino_QRCS} "resources/windows.qrc")
 endif()
 
-qt4_wrap_ui(arduino_UI_SOURCES ${arduino_UIS})
-qt4_wrap_cpp(arduino_MOC_SOURCES ${arduino_MOCS})
-qt4_add_resources(arduino_QRC_SOURCES ${arduino_QRCS})
-
 if (UPDATE_TRANSLATIONS)
   set (FILES_TO_TRANSLATE ${arduino_SOURCES}
-  ${arduino_UI_SOURCES}
-  ${arduino_QRC_SOURCES}
-  ${arduino_MOC_SOURCES}
+  ${arduino_UIS}
+  ${arduino_QRCS}
+  ${arduino_MOCS}
   ${utils_SOURCES}
   ${utils_OS_SOURCES}
-  ${utils_MOC_SOURCES}
+  ${utils_MOCS}
   ${rc_SOURCES})
-  qt4_create_translation(arduino_QM ${FILES_TO_TRANSLATE} ${arduino_TS})
+  qt5_create_translation(arduino_QM ${FILES_TO_TRANSLATE} ${arduino_TS})
 else (UPDATE_TRANSLATIONS)
-  qt4_add_translation(arduino_QM ${arduino_TS})
+  qt5_add_translation(arduino_QM ${arduino_TS})
 endif (UPDATE_TRANSLATIONS)
 add_custom_target (translations_target DEPENDS ${arduino_QM})
 
-set(arduino_LINK_LIBRARIES ${Qt4_LINK_LIBRARIES} ${Grantlee_CORE_LIBRARIES} ${QScintilla_LIBRARY} ${CoreFoundation_LIBRARY} ${IOKit_LIBRARY} ${Win32_LIBRARIES} ${UDEV_LIBRARIES})
+set(arduino_LINK_LIBRARIES ${Qt5_LINK_LIBRARIES} ${Grantlee_CORE_LIBRARIES} ${QScintilla_LIBRARY} ${CoreFoundation_LIBRARY} ${IOKit_LIBRARY} ${Win32_LIBRARIES} ${UDEV_LIBRARIES})
 
 add_executable(arduino-ide
   ${GUI_TYPE}
   ${arduino_SOURCES}
-  ${arduino_UI_SOURCES}
-  ${arduino_QRC_SOURCES}
-  ${arduino_MOC_SOURCES}
+  ${arduino_UIS}
+  ${arduino_QRCS}
+  ${arduino_MOCS}
   ${utils_SOURCES}
   ${utils_OS_SOURCES}
-  ${utils_MOC_SOURCES}
+  ${utils_MOCS}
   ${rc_SOURCES}
   ${arduino_QM})
 set_target_properties(arduino-ide PROPERTIES
   ENABLE_EXPORTS ON)
 target_link_libraries(arduino-ide ${arduino_LINK_LIBRARIES})
+target_include_directories(arduino-ide PRIVATE "${AUTOGEN_BUILD_DIR}/include")
 
 # Plugins
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -371,7 +377,7 @@ set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.3.1-6), libgcc1 (>= 1:3.4.2-12), libqtgui4 (>=4.4.0-1)")
 set(DEBIAN_PACKAGE_RECOMMENDS "")
 set(DEBIAN_PACKAGE_SUGGESTS "")
-set(DEBIAN_PACKAGE_BUILDS_DEPENDS "cmake (>=2.6), libqt4-dev")
+set(DEBIAN_PACKAGE_BUILDS_DEPENDS "cmake (>=2.6), libqt5-dev")
 
 # RPM
 set(CPACK_RPM_PACKAGE_RELEASE "1")

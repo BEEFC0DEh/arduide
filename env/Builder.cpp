@@ -31,7 +31,7 @@ This program is free software; you can redistribute it and/or modify
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QProcess>
 #include <QDebug>
 

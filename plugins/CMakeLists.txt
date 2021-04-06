@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.16.0)
+
 set(PLUGINS "serial" "debugger")
 
 file(GLOB plugins_SOURCES
@@ -6,6 +8,14 @@ list(APPEND arduino_SOURCES ${plugins_SOURCES})
 set(arduino_SOURCES ${arduino_SOURCES} PARENT_SCOPE)
 
 add_definitions(-DIDE_PLUGIN)
+
+# Qt 5+ boilerplate
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
 foreach(PLUGIN ${PLUGINS})
   file(GLOB plugin_SOURCES
@@ -21,22 +31,12 @@ foreach(PLUGIN ${PLUGINS})
   file(GLOB plugin_QRCS
     "${PLUGIN}/*.qrc")
 
-  # Empty the variables as qt4_wrap_* would append the result of the
-  # previous call with the new result.
-  set(plugin_UI_SOURCES "")
-  set(plugin_MOC_SOURCES "")
-  set(plugin_QRC_SOURCES "")
-
-  qt4_wrap_ui(plugin_UI_SOURCES ${plugin_UIS})
-  qt4_wrap_cpp(plugin_MOC_SOURCES ${plugin_MOCS})
-  qt4_add_resources(plugin_QRC_SOURCES ${plugin_QRCS})
-
   add_library(${PLUGIN} MODULE
     ${plugins_SOURCES}
     ${plugin_SOURCES}
-    ${plugin_UI_SOURCES}
-    ${plugin_MOC_SOURCES}
-    ${plugin_QRC_SOURCES})
+    ${plugin_UIS}
+    ${plugin_MOCS}
+    ${plugin_QRCS})
   target_link_libraries(${PLUGIN} arduino-ide ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QScintilla_LIBRARY})
   set_target_properties(${PLUGIN} PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")

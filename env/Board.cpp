@@ -57,7 +57,7 @@ void Board::listBoards()
             boardsFile.open(QFile::ReadOnly);
 
             QTextStream boardsFileUTF8(&boardsFile);
-            boardsFileUTF8.setCodec("UTF-8");
+//            boardsFileUTF8.setCodec("UTF-8");
 
             while (! boardsFileUTF8.atEnd())
             {

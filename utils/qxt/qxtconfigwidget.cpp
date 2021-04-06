@@ -83,7 +83,7 @@ void QxtConfigDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt
             painter->fillRect(opt.rect, option.palette.brush(cg, QPalette::Highlight));
         else if ((option.state & QStyle::State_MouseOver) && (option.state & QStyle::State_Enabled))
         {
-            QColor color = option.palette.color(cg, QPalette::Highlight).light();
+            QColor color = option.palette.color(cg, QPalette::Highlight).lighter();
             if (color == option.palette.color(cg, QPalette::Base))
                 color = option.palette.color(cg, QPalette::AlternateBase);
             painter->fillRect(opt.rect, color);
@@ -101,7 +101,7 @@ void QxtConfigDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt
 QSize QxtConfigDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     int margin = qApp->style()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1;
-    int textWidth = option.fontMetrics.width(index.data().toString());
+    int textWidth = option.fontMetrics.horizontalAdvance(index.data().toString());
     int width = qMax(textWidth, option.decorationSize.width()) + 2 * margin;
     int height = option.fontMetrics.height() + option.decorationSize.height() + margin;
     return QSize(width, height);
@@ -141,8 +141,8 @@ void QxtConfigWidgetPrivate::relayout()
         splitter->setOrientation(Qt::Vertical);
         table->setRowCount(1);
         table->setColumnCount(0);
-        table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-        table->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+        table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+        table->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         table->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
         table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
@@ -151,8 +151,8 @@ void QxtConfigWidgetPrivate::relayout()
         splitter->setOrientation(Qt::Horizontal);
         table->setRowCount(0);
         table->setColumnCount(1);
-        table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-        table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+        table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        table->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         table->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     }

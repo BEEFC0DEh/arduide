@@ -142,4 +142,4 @@ void SerialPlugin::continuousRead(const QByteArray &data)
     widget->setData(currentData);
 }
 
-Q_EXPORT_PLUGIN2(serial, SerialPlugin)
+Q_PLUGIN_METADATA(IID "arduide.SerialPlugin")

@@ -357,14 +357,14 @@ void DebuggerPlugin::sendCommand(QString cmd)
         {
             data.append(VAR_WRITE);
             QMessageBox::information(NULL, tr("args[0] (size=%1)").arg(args[0].size()), args[0]);
-            data.append(QString::number((char)args[0].size()));
-            data.append(args[0]);
+            data.append(QString::number((char)args[0].size()).toLatin1());
+            data.append(args[0].toLatin1());
             QMessageBox::information(NULL, "args[1]", args[1]);
-            data.append(QString::number((char)args[1].size()));
-            data.append(args[1]);
+            data.append(QString::number((char)args[1].size()).toLatin1());
+            data.append(args[1].toLatin1());
             QMessageBox::information(NULL, "args[2]", args[2]);
-            data.append(QString::number((char)args[2].size()));
-            data.append(args[2]);
+            data.append(QString::number((char)args[2].size()).toLatin1());
+            data.append(args[2].toLatin1());
         }
     }
     else if (func == "help")
@@ -589,4 +589,4 @@ void DebuggerPlugin::parseError(QString error)
     widget->logError(tr(">>> %2").arg(error));
 }
 
-Q_EXPORT_PLUGIN2(debugger, DebuggerPlugin)
+Q_PLUGIN_METADATA(IID "arduide.DebuggerPlugin")

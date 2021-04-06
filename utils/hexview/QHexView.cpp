@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <QClipboard>
 #include <QSignalMapper>
 #include <QPalette>
-#include <cctype>
+#include <locale>
 #include <climits>
 #include <memory>
 
@@ -195,7 +195,7 @@ QMenu *QHexView::createStandardContextMenu() {
 // Desc: default context menu event, simply shows standard menu
 //------------------------------------------------------------------------------
 void QHexView::contextMenuEvent(QContextMenuEvent *event) {
-        std::auto_ptr<QMenu> menu(createStandardContextMenu());
+        QMenu *menu(createStandardContextMenu());
         menu->exec(event->globalPos());
 }
 
@@ -319,7 +319,7 @@ bool QHexView::isPrintable(unsigned int ch) {
 
         // if it's standard ascii use isprint, otherwise go with our observations
         if(ch < 0x80) {
-                return util::safe_ctype<std::isprint>(ch) || util::safe_ctype<std::isspace>(ch);
+                return std::isprint(ch) || std::isspace(ch);
         } else {
                 return (ch & 0xff) >= 0xa0;
         }
@@ -795,24 +795,24 @@ void QHexView::drawHexDump(QPainter &painter, unsigned int offset, unsigned int 
                                 quint8	b;
                         } value = { 0 };
 
-                        QString byteBuffer;
+                        QString byteBuffer = QStringLiteral("0x%1");
 
                         switch(m_WordWidth) {
                         case 1:
                                 value.b |= dataRef[index + 0];
-                                byteBuffer.sprintf("%02x", value.b);
+                                byteBuffer = byteBuffer.arg(value.b, 2, 16, QChar('0'));
                                 break;
                         case 2:
                                 value.w |= dataRef[index + 0];
                                 value.w |= dataRef[index + 1] << 8;
-                                byteBuffer.sprintf("%04x", value.w);
+                                byteBuffer = byteBuffer.arg(value.w, 4, 16, QChar('0'));
                                 break;
                         case 4:
                                 value.d |= dataRef[index + 0];
                                 value.d |= dataRef[index + 1] << 8;
                                 value.d |= dataRef[index + 2] << 16;
                                 value.d |= dataRef[index + 3] << 24;
-                                byteBuffer.sprintf("%08x", value.d);
+                                byteBuffer = byteBuffer.arg(value.d, 8, 16, QChar('0'));
                                 break;
                         case 8:
                                 // we need the cast to ensure that it won't assume 32-bit
@@ -825,7 +825,7 @@ void QHexView::drawHexDump(QPainter &painter, unsigned int offset, unsigned int 
                                 value.q |= static_cast<quint64>(dataRef[index + 5]) << 40;
                                 value.q |= static_cast<quint64>(dataRef[index + 6]) << 48;
                                 value.q |= static_cast<quint64>(dataRef[index + 7]) << 56;
-                                byteBuffer.sprintf("%016llx", value.q);
+                                byteBuffer = byteBuffer.arg(value.q, 16, 16, QChar('0'));
                                 break;
                         }
 

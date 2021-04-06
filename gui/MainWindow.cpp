@@ -39,6 +39,7 @@ This program is free software; you can redistribute it and/or modify
 #include <QDesktopServices>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QUrlQuery>
 
 #include "EditorFactory.h"
 #include "LexerArduino.h"
@@ -649,12 +650,12 @@ void MainWindow::uploadToPastebin()
         request.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
 
         QByteArray data;
-        QUrl params;
+        QUrlQuery params;
         params.addQueryItem("paste_name",QFileInfo(e->fileName()).fileName());
         params.addQueryItem("paste_code",e->text());
         params.addQueryItem("paste_private", "1");
         params.addQueryItem("paste_format","cpp");
-        data.append(params.encodedQuery());
+        data.append(params.query(QUrl::FullyEncoded).toLatin1());
 
         pastebin.post(request,data);
     }

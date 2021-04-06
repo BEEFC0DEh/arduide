@@ -23,7 +23,7 @@
  **
  ****************************************************************************/
 #include "qxtlineedit.h"
-#include <QStyleOptionFrameV2>
+#include <QStyleOptionFrame>
 #include <QPainter>
 #include <QStyle>
 
@@ -100,16 +100,16 @@ void QxtLineEdit::paintEvent(QPaintEvent* event)
     QLineEdit::paintEvent(event);
     if (displayText().isEmpty() && !hasFocus())
     {
-        QStyleOptionFrameV2 option;
+        QStyleOptionFrame option;
         initStyleOption(&option);
 
 
         QRect r = style()->subElementRect(QStyle::SE_LineEditContents, &option, this);
 #if QT_VERSION >= 0x040500
         // TODO: sort out prior Qt 4.5
-        int left, top, right, bottom;
-        getTextMargins(&left, &top, &right, &bottom);
-        r.adjust(left, top, -right, -bottom);
+//        int left, top, right, bottom;
+        QMargins margins = textMargins();
+        r.adjust(margins.left(), margins.top(), -margins.right(), -margins.bottom());
 #endif // QT_VERSION >= 0x040500
         r.adjust(hMargin, vMargin, -hMargin, -vMargin);
 

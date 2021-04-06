@@ -79,7 +79,7 @@ void LexerArduino::loadKeywordsFile(const QString &fileName)
         line = QString::fromLocal8Bit(keywordsFile.readLine()).trimmed();
         if (line.isEmpty() || line[0] == '#')
             continue;
-        pieces = line.split(QRegExp("\\s"), QString::SkipEmptyParts);
+        pieces = line.split(QRegExp("\\s"), Qt::SkipEmptyParts);
         if (pieces.size() < 2)
             continue;
         if (pieces[1] == "LITERAL1" || pieces[1] == "KEYWORD1")

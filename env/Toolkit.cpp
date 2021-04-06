@@ -33,9 +33,17 @@ This program is free software; you can redistribute it and/or modify
 #include <QFile>
 #include <QProcess>
 #include <QDebug>
+#include <QSysInfo>
 
 #include "Board.h"
 #include "IDEApplication.h"
+
+
+const QString HARDWARE = QStringLiteral("hardware/");
+const QString ARDUINO  = QStringLiteral("archlinux-arduino/");
+const QString BOARDS   = QStringLiteral("boards.txt");
+const QString AVR      = QStringLiteral("avr/");
+const QString SAMD      = QStringLiteral("samd/");
 
 QStringList Toolkit::findSketchesInDirectory(const QString &directory)
 {
@@ -88,26 +96,26 @@ QString Toolkit::referencePath()
 
 QString Toolkit::hardwarePath()
 {
-    return QDir(ideApp->settings()->arduinoPath()).filePath("hardware");
+    return QDir(ideApp->settings()->arduinoPath()).filePath(HARDWARE);
 }
 
 QStringList Toolkit::boardsFileNames()
 {
     QStringList userHwList;
     if(toolkitVersionInt(ideApp->settings()->arduinoPath()) >= 160)
-        userHwList << QDir(hardwarePath()).filePath("arduino/avr/boards.txt");
+        userHwList << QDir(hardwarePath()).filePath(ARDUINO + AVR + BOARDS);
     else
-        userHwList << QDir(hardwarePath()).filePath("arduino/boards.txt");
+        userHwList << QDir(hardwarePath()).filePath(ARDUINO + BOARDS);
 
     QDir sketchDir = QDir(ideApp->settings()->sketchPath());
-    if (sketchDir.cd("hardware"))
+    if (sketchDir.cd(HARDWARE))
     {
         sketchDir.setFilter(QDir::AllDirs);
         QStringList hwList = sketchDir.entryList();
         foreach(QString dir, hwList)
         {
-            if (QDir(sketchDir.filePath(dir)).exists("boards.txt"))
-                userHwList.push_back(sketchDir.filePath(dir + "/boards.txt"));
+            if (QDir(sketchDir.filePath(dir)).exists(BOARDS))
+                userHwList.push_back(sketchDir.filePath(dir + '/' + BOARDS));
         }
     }
 
@@ -121,7 +129,11 @@ QString Toolkit::keywordsFileName()
 
 QString Toolkit::toolkitVersion(const QString &path)
 {
-    if(QFileInfo(QDir(path).filePath("hardware/arduino/boards.txt")).isReadable() || (QFileInfo(QDir(path).filePath("hardware/arduino/avr/boards.txt")).isReadable() && QFileInfo(QDir(path).filePath("hardware/arduino/sam/boards.txt")).isReadable()))
+    if(
+            QFileInfo(QDir(path).filePath(HARDWARE + ARDUINO + BOARDS)).isReadable()
+            || QFileInfo(QDir(path).filePath(HARDWARE + ARDUINO + AVR + BOARDS)).isReadable()
+            || QFileInfo(QDir(path).filePath(HARDWARE + ARDUINO + SAMD + BOARDS)).isReadable()
+    )
     {
         QFile file(QDir(path).filePath("revisions.txt"));
         if(!file.open(QFile::ReadOnly))
@@ -146,7 +158,8 @@ bool Toolkit::isValidArduinoPath(const QString &path)
 {
     QString version = toolkitVersion(path);
 
-    return version == "1.6.0" || version == "1.0.5" || version == "1.0.4" || version == "1.0.3" || version == "1.0.2" || version == "1.0.1" || version == "1.0" || version == "0023";
+//    return version == "1.6.0" || version == "1.0.5" || version == "1.0.4" || version == "1.0.3" || version == "1.0.2" || version == "1.0.1" || version == "1.0" || version == "0023";
+    return version >= "1.6.0";
 }
 
 QString Toolkit::avrPath()
@@ -406,7 +419,7 @@ bool Toolkit::avrdudeSystem()
 {
   QProcess proc;
 
-  proc.start(QString("avrdude"));
+  proc.start(QString("avrdude"), {});
   if(proc.waitForStarted())
     return true;
 

@@ -72,7 +72,7 @@ FirstTimeWizard::FirstTimeWizard(QWidget *parent)
             << QDir(applicationPath).filePath("arduino-" ARDUINO_SDK_VERSION)
             << QDir(applicationPath).filePath("arduino");
 #else
-    QString applicationPath = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+    QString applicationPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
     defaultArduinoPaths
         << QDir(applicationPath).filePath("arduino-" ARDUINO_SDK_VERSION_NAME)
@@ -146,7 +146,7 @@ FirstTimeWizard::FirstTimeWizard(QWidget *parent)
 
     mDownloadManager = new QNetworkAccessManager(this);
     QNetworkDiskCache *downloadCache = new QNetworkDiskCache(mDownloadManager);
-    downloadCache->setCacheDirectory(QDesktopServices::storageLocation(QDesktopServices::CacheLocation));
+    downloadCache->setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::CacheLocation));
     mDownloadManager->setCache(downloadCache);
 
     setupActions();
@@ -251,7 +251,7 @@ bool FirstTimeWizard::validateCurrentPage()
         // extract the archive
         QTemporaryFile archive("arduino");
         bool extractSuccess = archive.open();
-        QString destinationPath = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+        QString destinationPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
         QDir destinationDir(destinationPath);
         if (! destinationDir.exists())
             extractSuccess = extractSuccess && destinationDir.mkpath(".");

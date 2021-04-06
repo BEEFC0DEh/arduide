@@ -31,7 +31,7 @@ This program is free software; you can redistribute it and/or modify
 #include <QDir>
 #include <QDebug>
 
-#include <grantlee_core.h>
+#include <grantlee_templates.h>
 
 #include "Browser.h"
 #include "IDEApplication.h"
@@ -55,7 +55,7 @@ void PageRenderer::render(const QString &pageName, const QVariantHash &mapping)
 
         mPage = t->render(&c);
     }
-    catch(Grantlee::Exception e)
+    catch(const Grantlee::Exception &e)
     {
         qDebug("PageRenderer::PageRenderer: %s", qPrintable(e.what()));
     }
